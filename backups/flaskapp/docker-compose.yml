@@ -1,0 +1,20 @@
+version: "2.0"
+services:
+        flaskapp:
+                build: ./flaskapp
+                image: flaskapp
+                networks:
+                        - app
+        nginx:
+                image: lab12-nginx
+                ports:
+                        - 8080:80
+                networks:
+                        - app
+                depends_on:
+                        - flaskapp
+        redis:
+                image:
+                        -redis
+networks:
+        app:

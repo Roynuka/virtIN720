@@ -1,0 +1,53 @@
+
+    print("Deleting  Network...")
+    network = conn.network.find_network(NETWORK)
+    router = conn.network.find_router(ROUTER)
+    subnet = conn.netowork.find_subnet(SUBNET)
+	
+    print("Destroying all servers.....")
+    for server in SERVERLIST:
+        check_server = conn.compute.find_server(server)
+
+        # Release floating IP before destroying woodjj1-web server
+        if check_server:
+             check_server = con.compute.get_server(check_server)
+             if server == 'woodjj1-web':
+                web_server = conn.compute.get_server(check_server)
+                web_floating_ip = web_server["addresses"][NETWORK][1]["addr"]
+
+                print("Disassociate floating IP from WEB server......")
+                conn.compute.remove_floating_ip_from_server(web_server, web_floating_ip)
+
+                check_ip = conn.network.find_ip(web_floating_ip)
+                conn.network.delete_ip(check_ip)
+                print("Floating IP Released")
+
+                conn.compute.delete_server(check_server)
+                print(" [" + server + "] server has been destroyed")
+        else:
+            print(" [" + server + "] server not found")
+
+  # Destroy router if it exists
+    print("Destroying router......")
+    if router:
+        conn.network.remove_interface_from_router(router, subnet.id)
+        conn.network.delete_router(router)
+        print("Router has been destroyed")
+    else:
+        print("Router does not exist")
+
+    # Destroy subnet if it exists
+    print("Destroying subnet......")
+    if subnet:
+        conn.network.delete_subnet(subnet)
+        print("Subnet has been destroyed")
+    else:
+        print("Subnet does not exist")
+
+    # Destroy network if it exists
+    print("Destroying network......")
+    if network:
+        conn.network.delete_network(network)
+        print("Network has been destroyed")
+    else:
+        print("Network does not exist")
